@@ -27,22 +27,22 @@ class ArticlesViewModel : ViewModel() {
     val isLoading: Boolean get() = loadingState.value == LoadingState.LOADING
     val isInitial: Boolean get() = loadingState.value == LoadingState.INITIAL
 
-    fun reload() {
-        query(listOf())
+    fun reload(bearer: String) {
+        query(listOf(), bearer)
     }
 
-    fun search(search: String) {
-        query(listOf("q" to search))
+    fun search(search: String, bearer: String) {
+        query(listOf("query" to "title:${search}"), bearer)
     }
 
-    private fun query(parameters: Parameters) {
+    private fun query(parameters: Parameters, bearer: String) {
         viewModelScope.launch {
             loadingState.value = LoadingState.LOADING
             val request = Request.Builder()
                 .url("https://qiita.com/api/v2/items")
                 .headers(
                     mapOf(
-                        "Authorization" to "Bearer c1bf368f4091e9fcad8fb44b4fe0eb274deba4ea"
+                        "Authorization" to bearer
                     )
                 )
                 .parameters(parameters)
@@ -58,6 +58,7 @@ class ArticlesViewModel : ViewModel() {
                     addAll(result)
                     loadingState.value = LoadingState.LOADED
                 }
+                Log.d("ArticlesViewModel", parameters.size.toString() + result[0].title)
             } catch (e: Throwable) {
                 Log.e("fetch failed", e.message ?: "")
                 loadingState.value = LoadingState.ERROR_OCCURRED

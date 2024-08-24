@@ -17,12 +17,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.abplus.qiitaly3.ui.component.Loading
 import com.abplus.qiitaly3.ui.component.MainAppBar
 import com.abplus.qiitaly3.ui.component.SearchAppBar
 import com.abplus.qiitaly3.ui.screen.ArticleListScreen
 import com.abplus.qiitaly3.ui.theme.Qiitaly3Theme
+import com.abplus.qiitaly3.util.AssetReader
 import com.abplus.qiitaly3.viewmodel.ArticlesViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -31,17 +33,19 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             Qiitaly3Theme {
+                val bearer = stringResource(id = R.string.bearer)
                 val viewModel: ArticlesViewModel = viewModel()
                 val pullState = rememberPullRefreshState(
                     refreshing = viewModel.isLoading,
                     onRefresh = {
-                        viewModel.reload()
+                        viewModel.reload(bearer = bearer)
                     }
                 )
                 if (viewModel.isInitial) {
-                    viewModel.reload()
+                    viewModel.reload(bearer = bearer)
                 }
                 var searchMode by remember {
                     mutableStateOf(false)
@@ -52,7 +56,7 @@ class MainActivity : ComponentActivity() {
                         if (searchMode) {
                             SearchAppBar(
                                 onSearch = {
-                                    viewModel.search(it)
+                                    viewModel.search(it, bearer = bearer)
                                     //LocalSoftwareKeyboardController.current?.hide()
                                 },
                                 onCancel = {
